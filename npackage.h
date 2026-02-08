@@ -125,6 +125,11 @@ signals whether asset a is compressed
 uint8_t nasset_compression(nasset *a);
 
 /*
+load asset from disk
+*/
+nasset * nasset_from_disk(const wchar_t *k, const wchar_t *fp);
+
+/*
 get/fetch asset from package p given a key k
 */
 nasset *nasset_get(npackage *p, const wchar_t *k);
@@ -158,11 +163,6 @@ uint8_t npackage_has_key(npackage *p, const wchar_t *k);
 size of header without attached assets
 */
 uint64_t npackage_header_size(npackage *p);
-
-/*
-load asset from disk
-*/
-nasset * nasset_from_disk(const wchar_t *k, const wchar_t *fp);
 
 /*
 size of npackage
