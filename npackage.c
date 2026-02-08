@@ -60,7 +60,7 @@ uint8_t npackage_save(const wchar_t *fp, npackage *p)
     uint8_t t4 = fwrite(&p->mod_count, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t5 = fwrite(&p->asset_count, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t6 = fwrite(p->sizes, sizeof(uint64_t), p->asset_count, fh) == p->asset_count;
-    uint64_t t7 = 1;
+    uint64_t t7 = 0;
     nasset *a;
     for ( uint64_t k = 0; k < p->asset_count; k++ ) {
         a = &p->assets[k];

@@ -210,7 +210,7 @@ void iut4()
 	nasset_set_key(a1, k1);
 	nasset_set_value(a1, d1, 1);
 	nasset_insert(p, a1);
-	npackage_save(fp, p);
+	printf("export sum: %d\n", npackage_save(fp, p));
 	free(fp);
 	free(k1);
 	free(d1);
