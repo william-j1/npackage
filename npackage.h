@@ -1,0 +1,177 @@
+/******************************************************************
+* Copyright (C) 2026 NLABS -- William J. <williamj.inbox@gmail.com>
+* 
+* This program is free software; you can redistribute it and/or
+* modify it under the terms of the GNU General Public License
+* as published by the Free Software Foundation; either version 2
+* of the License, or (at your option) any later version.
+
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, see https://www.gnu.org/licenses/
+*******************************************************************/
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <wchar.h>
+
+/*
+nasset's are nested inside npackages
+*/
+typedef struct
+{
+    /*
+    pointer to parent
+    */
+    void *package;
+
+    /*
+	assembly epoch
+	*/
+	uint64_t make_time;
+
+    /*
+	last modification time
+	*/
+	uint64_t mod_time;
+
+    /*
+	modifications count of the package
+	*/
+	uint64_t mod_count;
+
+    /*
+    length of raw data in bytes
+    */
+    uint64_t data_len;
+
+	/*
+	encryption id
+	*/
+	uint8_t encryption;
+
+	/*
+	compression id
+	*/
+	uint8_t compression;
+
+	/*
+	length of key in bytes
+	*/
+	uint64_t key_len;
+
+    /*
+    key ident
+    */
+    const wchar_t *key;
+
+    /*
+    raw data
+    */
+    unsigned char *data;
+}
+nasset;
+
+/*
+npackage's contain a number of nassets
+*/
+typedef struct
+{
+	/*
+	assembly epoch
+	*/
+	uint64_t make_time;
+
+	/*
+	last modification time
+	*/
+	uint64_t mod_time;
+
+	/*
+	modifications count of the package
+	*/
+	uint64_t mod_count;
+
+	/*
+	number of enclosed assets
+	*/
+	uint64_t asset_count;
+
+	/*
+	sizes of each enclosed asset
+	*/
+	uint64_t *sizes;
+
+	/*
+	dataset assets
+	*/
+	nasset *assets;
+}
+npackage;
+
+/*
+assemble an empty asset
+*/
+nasset *init_nasset(void);
+
+/*
+signals whether asset a is compressed
+*/
+uint8_t nasset_compression(nasset *a);
+
+/*
+get/fetch asset from package p given a key k
+*/
+nasset *nasset_get(npackage *p, const wchar_t *k);
+
+/*
+insert an asset a into a package p
+*/
+uint8_t nasset_insert(npackage *p, nasset *a);
+
+/*
+size of asset a
+*/
+uint64_t nasset_size(nasset *a);
+
+/*
+size of all assets
+*/
+uint64_t nassets_size(npackage *p);
+
+/*
+assemble an empty package
+*/
+npackage *init_npackage(void);
+
+/*
+queries whether a given key exists in the heap
+*/
+uint8_t npackage_has_key(npackage *p, const wchar_t *k);
+
+/*
+size of header without attached assets
+*/
+uint64_t npackage_header_size(npackage *p);
+
+/*
+load asset from disk
+*/
+nasset * nasset_from_disk(const wchar_t *k, const wchar_t *fp);
+
+/*
+size of npackage
+*/
+uint64_t npackage_size(npackage *p);
+
+/*
+set an assets (key, value) given an asset a
+- the existing key should it exist will be freed
+*/
+uint8_t nasset_set_key(nasset *a, const wchar_t *k);
+uint8_t nasset_set_value(nasset *a, unsigned char *v, uint64_t len);
