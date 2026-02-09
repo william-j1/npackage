@@ -121,7 +121,7 @@ npackage;
 /*
 assemble an empty asset
 */
-nasset *init_nasset(void);
+nasset *new_nasset(void);
 
 /*
 load asset from disk
@@ -151,7 +151,7 @@ uint64_t nassets_size(npackage *p);
 /*
 assemble an empty package
 */
-npackage *init_npackage(void);
+npackage *new_npackage(void);
 
 /*
 signals whether package p is compressed

@@ -11,12 +11,12 @@ integrity unit test 1
 */
 void iut1(void)
 {
-	npackage *p = init_npackage();
-	nasset * a1 = init_nasset();
-	nasset * a2 = init_nasset();
-	nasset * a3 = init_nasset();
-	nasset * a4 = init_nasset();
-	nasset * a5 = init_nasset();
+	npackage *p = new_npackage();
+	nasset * a1 = new_nasset();
+	nasset * a2 = new_nasset();
+	nasset * a3 = new_nasset();
+	nasset * a4 = new_nasset();
+	nasset * a5 = new_nasset();
 
 	printf("package size: %d\n", npackage_size(p));
 	printf("a1 asset size: %d\n", nasset_size(a1));
@@ -126,8 +126,8 @@ integrity unit test 2
 */
 void iut2(void)
 {
-	npackage *p = init_npackage();
-	nasset *a1 = init_nasset();
+	npackage *p = new_npackage();
+	nasset *a1 = new_nasset();
 
 	wchar_t *k1 = (wchar_t *)malloc(5 * sizeof(wchar_t));
 	wchar_t *k2 = (wchar_t *)malloc(5 * sizeof(wchar_t));
@@ -199,8 +199,8 @@ void iut4()
 	wchar_t *fp = (wchar_t *)malloc(13 * sizeof(wchar_t));
 	wcsncpy(fp, L"tests\\iut4_1", 13);
     fp[12] = L'\0';
-	npackage *p = init_npackage();
-	nasset * a1 = init_nasset();
+	npackage *p = new_npackage();
+	nasset * a1 = new_nasset();
 	wchar_t *k1 = (wchar_t *)malloc(5 * sizeof(wchar_t));
 	wcsncpy(k1, L"key1", 4);
     k1[4] = L'\0';

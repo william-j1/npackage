@@ -18,7 +18,7 @@
 ********************************************************************/
 #include "npackage.h"
 
-npackage *init_npackage(void)
+npackage *new_npackage(void)
 {
     npackage *p = (npackage*)malloc(sizeof(npackage));
     p->make_time = time(NULL);
@@ -55,7 +55,7 @@ uint64_t npackage_header_size(npackage *p)
 npackage * npackage_load(const wchar_t *fp)
 {
 	FILE *fh;
-	npackage *p = init_npackage();
+	npackage *p = new_npackage();
     uint8_t sig[7] = {110, 108, 97, 98, 115, 110, 112};
     uint8_t fsig[7] = {0, 0, 0, 0, 0, 0, 0};
 	fh = _wfopen(fp, L"rb");
@@ -82,7 +82,7 @@ npackage * npackage_load(const wchar_t *fp)
     uint64_t t7 = 0;
     for ( k = 0; k < p->asset_count; k++ )
     {
-        nasset *a = init_nasset();
+        nasset *a = new_nasset();
         t7 += fread(&a->make_time, sizeof(uint64_t), 1, fh);
         t7 += fread(&a->mod_time, sizeof(uint64_t), 1, fh);
         t7 += fread(&a->mod_count, sizeof(uint64_t), 1, fh);
@@ -170,7 +170,7 @@ uint8_t npackage_encrypted(npackage *p)
 
 nasset * nasset_from_disk(const wchar_t *k, const wchar_t *fp)
 {
-    nasset *a = init_nasset();
+    nasset *a = new_nasset();
     FILE *fh = _wfopen(fp, L"rb");
     uint64_t len;
     if ( !fh ) {
@@ -207,7 +207,7 @@ nasset *nasset_get(npackage *p, const wchar_t *k)
     return NULL;
 }
 
-nasset *init_nasset(void)
+nasset *new_nasset(void)
 {
     nasset *a = (nasset*)malloc(sizeof(nasset));
     a->package = NULL;
