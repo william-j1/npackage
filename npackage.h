@@ -14,6 +14,8 @@
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, see https://www.gnu.org/licenses/
 *******************************************************************/
+#ifndef _NLABS_NP
+#define _NLABS_NP
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -185,3 +187,5 @@ set an assets (key, value) given an asset a
 */
 uint8_t nasset_set_key(nasset *a, const wchar_t *k);
 uint8_t nasset_set_value(nasset *a, unsigned char *v, uint64_t len);
+
+#endif // _NLABS_NP
