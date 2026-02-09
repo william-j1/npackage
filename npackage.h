@@ -125,6 +125,11 @@ assemble an empty asset
 nasset *new_nasset(void);
 
 /*
+delete the asset from the package
+*/
+uint8_t nasset_delete(npackage *p, const wchar_t *k);
+
+/*
 load asset from disk
 */
 nasset * nasset_from_disk(const wchar_t *k, const wchar_t *fp);
@@ -148,6 +153,11 @@ uint64_t nasset_size(nasset *a);
 size of all assets
 */
 uint64_t nassets_size(npackage *p);
+
+/*
+unset the asset from the package
+*/
+nasset *nasset_unset(npackage *p, const wchar_t *k);
 
 /*
 assemble an empty package

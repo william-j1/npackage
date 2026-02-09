@@ -174,6 +174,15 @@ uint8_t npackage_encrypted(npackage *p)
     return p->encryption;
 }
 
+uint8_t nasset_delete(npackage *p, const wchar_t *k)
+{
+    nasset *a = nasset_unset(p, k);
+    if ( a == NULL )
+        return 0;
+    free(a);
+    return 1;
+}
+
 nasset * nasset_from_disk(const wchar_t *k, const wchar_t *fp)
 {
     nasset *a = new_nasset();
@@ -334,6 +343,47 @@ uint8_t nasset_insert(npackage *p, nasset *a)
     p->mod_count++;
     a->package = p;
     return 1;
+}
+
+nasset* nasset_unset(npackage *p, const wchar_t *k)
+{
+    for ( uint64_t q = 0; q < p->asset_count; q++ )
+    {
+        if ( wcscmp(p->assets[q].key, k) == 0 )
+        {
+            nasset* a = &p->assets[q];
+            uint64_t ac = p->asset_count;
+            uint64_t k = 0;
+
+            p->mod_count++;
+            p->mod_time = time(NULL);
+
+            p->asset_count--;
+            uint64_t* sz = (uint64_t*)malloc(p->asset_count * sizeof(uint64_t));
+            nasset* pa = (nasset*)malloc(p->asset_count * sizeof(nasset));
+
+            /*
+            reassign, skip over q
+            */
+            for (; k < q; k++ )
+            {
+                sz[k] = p->sizes[k];
+                pa[k] = p->assets[k];
+            }
+            k++;
+            for (; k < ac; k++ )
+            {
+                sz[k-1] = p->sizes[k];
+                pa[k-1] = p->assets[k];
+            }
+            free(p->sizes);
+            free(p->assets);
+            p->sizes = sz;
+            p->assets = pa;
+            return a;
+        }
+    }
+    return NULL;
 }
 
 uint64_t npackage_size(npackage *p)

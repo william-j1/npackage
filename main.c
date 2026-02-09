@@ -10,5 +10,6 @@ int main(void)
 	iut2();
 	iut3();
 	iut4();
+	iut5();
 	return 0;
 }
