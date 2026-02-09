@@ -165,6 +165,11 @@ size of header without attached assets
 uint64_t npackage_header_size(npackage *p);
 
 /*
+load package from disk file
+*/
+npackage * npackage_load(const wchar_t *fp);
+
+/*
 flush package into disk file
 */
 uint8_t npackage_save(const wchar_t *fp, npackage *p);

@@ -211,6 +211,14 @@ void iut4()
 	nasset_set_value(a1, d1, 1);
 	nasset_insert(p, a1);
 	printf("export sum: %d\n", npackage_save(fp, p));
+
+    npackage *q = npackage_load(fp);
+    if ( q != NULL )
+        printf("asset count: %d\n", q->asset_count);
+    else
+        printf("load failed");
+    assert(p->assets[0].data[0] == d1[0]);
+
 	free(fp);
 	free(k1);
 	free(d1);

@@ -48,12 +48,57 @@ uint64_t npackage_header_size(npackage *p)
     return s;
 }
 
+npackage * npackage_load(const wchar_t *fp)
+{
+	FILE *fh;
+	npackage *p = init_npackage();
+    uint8_t sig[7] = {110, 108, 97, 98, 115, 110, 112};
+    uint8_t fsig[7] = {0, 0, 0, 0, 0, 0, 0};
+
+	fh = _wfopen(fp, L"rb");
+    if ( fh == NULL )
+        return NULL;
+    uint8_t t1 = fread(fsig, sizeof(uint8_t), 7, fh) == 7;
+    uint8_t t2 = fread(&p->make_time, sizeof(uint64_t), 1, fh) == 1;
+    uint8_t t3 = fread(&p->mod_time, sizeof(uint64_t), 1, fh) == 1;
+    uint8_t t4 = fread(&p->mod_count, sizeof(uint64_t), 1, fh) == 1;
+    uint8_t t5 = fread(&p->asset_count, sizeof(uint64_t), 1, fh) == 1;
+    p->sizes = (uint64_t*)malloc(sizeof(uint64_t) * p->asset_count);
+    p->assets = (nasset*)malloc(sizeof(nasset) * p->asset_count);
+    uint8_t t6 = fread(p->sizes, sizeof(uint64_t), p->asset_count, fh) == p->asset_count;
+    uint64_t t7 = 0;
+    for ( uint64_t k = 0; k < p->asset_count; k++ )
+    {
+        nasset *a = init_nasset();
+        t7 += fread(&a->make_time, sizeof(uint64_t), 1, fh);
+        t7 += fread(&a->mod_time, sizeof(uint64_t), 1, fh);
+        t7 += fread(&a->mod_count, sizeof(uint64_t), 1, fh);
+        t7 += fread(&a->data_len, sizeof(uint64_t), 1, fh);
+        t7 += fread(&a->encryption, sizeof(uint8_t), 1, fh);
+        t7 += fread(&a->compression, sizeof(uint8_t), 1, fh);
+        t7 += fread(&a->key_len, sizeof(uint64_t), 1, fh);
+        a->key = (wchar_t*)malloc(sizeof(wchar_t) * a->key_len);
+        t7 += fread(a->key, sizeof(wchar_t), a->key_len, fh);
+        a->data = (unsigned char*)malloc(sizeof(char) * a->data_len);
+        t7 += fread(a->data, sizeof(char), a->data_len, fh);
+        t7 = t7 == (7 + a->key_len + a->data_len);
+        if ( t7 != 1 )
+            break;
+        a->package = p;
+        p->assets[k] = *a;
+    }
+    fclose(fh);
+    if ( t1 && t2 && t3 && t4 && t5 && t6 && t7 )
+        return p;
+    return NULL;
+}
+
 uint8_t npackage_save(const wchar_t *fp, npackage *p)
 {
     FILE *fh = _wfopen(fp, L"wb");
     if ( fh == NULL )
         return 0;
-    uint8_t sig[7] = {110, 108, 97, 98, 115, 110, 112}; 
+    uint8_t sig[7] = {110, 108, 97, 98, 115, 110, 112};
     uint8_t t1 = fwrite(sig, sizeof(uint8_t), 7, fh) == 7;
     uint8_t t2 = fwrite(&p->make_time, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t3 = fwrite(&p->mod_time, sizeof(uint64_t), 1, fh) == 1;
