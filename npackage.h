@@ -63,7 +63,7 @@ typedef struct
     /*
     key ident
     */
-    const wchar_t *key;
+    wchar_t *key;
 
     /*
     raw data
