@@ -1,4 +1,4 @@
 npackage
 ========
 
-Package management stnadard for assets and datasets.
+Package management standard for assets and datasets.
