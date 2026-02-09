@@ -25,11 +25,6 @@
 #include <wchar.h>
 
 /*
-entry signature
-*/
-const uint8_t _NP_PREFIX[] = {110, 108, 97, 98, 115, 110, 112};
-
-/*
 nasset's are nested inside npackages
 */
 typedef struct

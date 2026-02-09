@@ -54,6 +54,7 @@ npackage * npackage_load(const wchar_t *fp)
 {
 	FILE *fh;
 	npackage *p = init_npackage();
+    uint8_t sig[7] = {110, 108, 97, 98, 115, 110, 112};
     uint8_t fsig[7] = {0, 0, 0, 0, 0, 0, 0};
 	fh = _wfopen(fp, L"rb");
     if ( fh == NULL )
@@ -62,7 +63,7 @@ npackage * npackage_load(const wchar_t *fp)
     uint64_t k;
     for ( k = 0; k < 7; k++ )
     {
-        if ( _NP_PREFIX[k] != fsig[k] ) {
+        if ( sig[k] != fsig[k] ) {
             fclose(fh);
             return NULL;
         }
@@ -106,7 +107,8 @@ uint8_t npackage_save(const wchar_t *fp, npackage *p)
     FILE *fh = _wfopen(fp, L"wb");
     if ( fh == NULL )
         return 0;
-    uint8_t t1 = fwrite(_NP_PREFIX, sizeof(uint8_t), 7, fh) == 7;
+    uint8_t sig[7] = {110, 108, 97, 98, 115, 110, 112};
+    uint8_t t1 = fwrite(sig, sizeof(uint8_t), 7, fh) == 7;
     uint8_t t2 = fwrite(&p->make_time, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t3 = fwrite(&p->mod_time, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t4 = fwrite(&p->mod_count, sizeof(uint64_t), 1, fh) == 1;
