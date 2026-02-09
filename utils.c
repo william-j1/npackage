@@ -17,7 +17,7 @@ int8_t arrcmp(uint8_t p[], uint8_t q[], uint64_t len)
 uint8_t is_be()
 {
     /*
-    endian test - deference and test the   
+    endian test - dereference and test the   
     first 8 bit subset given a 32-bit set
     */
     int32_t _be = 1;
