@@ -179,6 +179,10 @@ uint8_t nasset_delete(npackage *p, const wchar_t *k)
     nasset *a = nasset_unset(p, k);
     if ( a == NULL )
         return 0;
+    if ( a->key != NULL )
+        free(a->key);
+    if ( a->data != NULL )
+        free(a->data);
     free(a);
     return 1;
 }
