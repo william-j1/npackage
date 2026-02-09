@@ -60,7 +60,7 @@ npackage * npackage_load(const wchar_t *fp)
     if ( fh == NULL )
         return NULL;
     uint8_t t1 = fread(fsig, sizeof(uint8_t), 7, fh) == 7;
-    uint64_t k;
+    int64_t k;
     for ( k = 0; k < 7; k++ )
     {
         if ( sig[k] != fsig[k] ) {
@@ -92,13 +92,32 @@ npackage * npackage_load(const wchar_t *fp)
         t7 += fread(a->data, sizeof(char), a->data_len, fh);
         t7 = t7 == (7 + a->key_len + a->data_len);
         if ( t7 != 1 )
+        {
+            if ( a->key != NULL )
+                free(a->key);
+            if ( a->data != NULL )
+                free(a->data);
+            free(a);
             break;
+        }
         a->package = p;
         p->assets[k] = *a;
     }
     fclose(fh);
     if ( t1 && t2 && t3 && t4 && t5 && t6 && t7 )
         return p;
+    while ( k >= 0 ) {
+        nasset *ah = &p->assets[k];
+        if ( ah->key != NULL )
+            free(ah->key);
+        if ( ah->data != NULL )
+            free(ah->data);
+        free(ah);
+        k--;
+    }
+    free(p->assets);
+    free(p->sizes);
+    free(p);
     return NULL;
 }
 
