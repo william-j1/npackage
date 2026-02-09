@@ -168,20 +168,12 @@ npackage * npackage_open(const wchar_t *fp)
             a->data_len = u64fswap_endian(a->data_len);
             a->key_len = u64fswap_endian(a->key_len);
             p->sizes[k] = u64fswap_endian(p->sizes[k]);
-
-            /*
-            the size of wchar_t on the export system
-            is not equal to the current wchar_t size
-            */
-            if ( _szwc != _szcw )
+            for ( uint64_t j = 0; j < a->key_len; j++ )
             {
-                for ( uint64_t j = 0; j < a->key_len; j++ )
-                {
-                    if ( _szcw == 2 )
-                        a->key[j] = (a->key[j] << 8) | (a->key[j] >> 8);
-                    else if ( _szcw == 4 )
-                        a->key[j] = (a->key[j] << 16) | (a->key[j] >> 16);
-                }
+                if ( _szcw == 2 )
+                    a->key[j] = (a->key[j] << 8) | (a->key[j] >> 8);
+                else if ( _szcw == 4 )
+                    a->key[j] = (a->key[j] << 16) | (a->key[j] >> 16);
             }
         }
 
