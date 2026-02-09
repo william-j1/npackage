@@ -54,11 +54,18 @@ npackage * npackage_load(const wchar_t *fp)
 	npackage *p = init_npackage();
     uint8_t sig[7] = {110, 108, 97, 98, 115, 110, 112};
     uint8_t fsig[7] = {0, 0, 0, 0, 0, 0, 0};
-
 	fh = _wfopen(fp, L"rb");
     if ( fh == NULL )
         return NULL;
     uint8_t t1 = fread(fsig, sizeof(uint8_t), 7, fh) == 7;
+    uint64_t k;
+    for ( k = 0; k < 7; k++ )
+    {
+        if ( sig[k] != fsig[k] ) {
+            fclose(fh);
+            return NULL;
+        }
+    }
     uint8_t t2 = fread(&p->make_time, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t3 = fread(&p->mod_time, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t4 = fread(&p->mod_count, sizeof(uint64_t), 1, fh) == 1;
@@ -67,7 +74,7 @@ npackage * npackage_load(const wchar_t *fp)
     p->assets = (nasset*)malloc(sizeof(nasset) * p->asset_count);
     uint8_t t6 = fread(p->sizes, sizeof(uint64_t), p->asset_count, fh) == p->asset_count;
     uint64_t t7 = 0;
-    for ( uint64_t k = 0; k < p->asset_count; k++ )
+    for ( k = 0; k < p->asset_count; k++ )
     {
         nasset *a = init_nasset();
         t7 += fread(&a->make_time, sizeof(uint64_t), 1, fh);
