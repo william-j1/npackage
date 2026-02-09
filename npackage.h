@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <wchar.h>
+#include "utils.h"
 
 /*
 nasset's are nested inside npackages

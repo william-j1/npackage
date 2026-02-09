@@ -61,15 +61,21 @@ npackage * npackage_load(const wchar_t *fp)
 	fh = _wfopen(fp, L"rb");
     if ( fh == NULL )
         return NULL;
+
+    /*
+    extract and compare signature    
+    */
     uint8_t t1 = fread(fsig, sizeof(uint8_t), 7, fh) == 7;
-    int64_t k;
-    for ( k = 0; k < 7; k++ )
-    {
-        if ( sig[k] != fsig[k] ) {
-            fclose(fh);
-            return NULL;
-        }
+    if ( !t1 ) { /* ... if less than 7 bytes read */
+        fclose(fh);
+        return NULL;
     }
+    if ( arrcmp(sig, fsig, 7) != 0 ) {
+        fclose(fh);
+        return NULL;
+    }
+    
+    int64_t k;
     uint8_t t2 = fread(&p->make_time, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t3 = fread(&p->mod_time, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t4 = fread(&p->mod_count, sizeof(uint64_t), 1, fh) == 1;
