@@ -55,16 +55,6 @@ typedef struct
     uint64_t data_len;
 
 	/*
-	encryption id
-	*/
-	uint8_t encryption;
-
-	/*
-	compression id
-	*/
-	uint8_t compression;
-
-	/*
 	length of key in bytes
 	*/
 	uint64_t key_len;
@@ -102,6 +92,16 @@ typedef struct
 	uint64_t mod_count;
 
 	/*
+	encryption id
+	*/
+	uint8_t encryption;
+
+	/*
+	compression id
+	*/
+	uint8_t compression;
+
+	/*
 	number of enclosed assets
 	*/
 	uint64_t asset_count;
@@ -122,11 +122,6 @@ npackage;
 assemble an empty asset
 */
 nasset *init_nasset(void);
-
-/*
-signals whether asset a is compressed
-*/
-uint8_t nasset_compression(nasset *a);
 
 /*
 load asset from disk
@@ -157,6 +152,16 @@ uint64_t nassets_size(npackage *p);
 assemble an empty package
 */
 npackage *init_npackage(void);
+
+/*
+signals whether package p is compressed
+*/
+uint8_t npackage_compression(npackage *p);
+
+/*
+signals whether package p is encrypted
+*/
+uint8_t npackage_encryption(npackage *p);
 
 /*
 queries whether a given key exists in the heap

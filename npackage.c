@@ -25,6 +25,8 @@ npackage *init_npackage(void)
     p->mod_time = 0;
     p->mod_count = 0;
     p->asset_count = 0;
+    p->encryption = 0;
+    p->compression = 0;
     p->sizes = NULL;
     p->assets = NULL;
     return p;
@@ -71,6 +73,8 @@ npackage * npackage_load(const wchar_t *fp)
     uint8_t t2 = fread(&p->make_time, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t3 = fread(&p->mod_time, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t4 = fread(&p->mod_count, sizeof(uint64_t), 1, fh) == 1;
+    uint8_t t8 = fread(&p->encryption, sizeof(uint8_t), 1, fh) == 1;
+    uint8_t t9 = fread(&p->compression, sizeof(uint8_t), 1, fh) == 1;
     uint8_t t5 = fread(&p->asset_count, sizeof(uint64_t), 1, fh) == 1;
     p->sizes = (uint64_t*)malloc(sizeof(uint64_t) * p->asset_count);
     p->assets = (nasset*)malloc(sizeof(nasset) * p->asset_count);
@@ -83,14 +87,12 @@ npackage * npackage_load(const wchar_t *fp)
         t7 += fread(&a->mod_time, sizeof(uint64_t), 1, fh);
         t7 += fread(&a->mod_count, sizeof(uint64_t), 1, fh);
         t7 += fread(&a->data_len, sizeof(uint64_t), 1, fh);
-        t7 += fread(&a->encryption, sizeof(uint8_t), 1, fh);
-        t7 += fread(&a->compression, sizeof(uint8_t), 1, fh);
         t7 += fread(&a->key_len, sizeof(uint64_t), 1, fh);
         a->key = (wchar_t*)malloc(sizeof(wchar_t) * a->key_len);
         t7 += fread(a->key, sizeof(wchar_t), a->key_len, fh);
         a->data = (unsigned char*)malloc(sizeof(char) * a->data_len);
         t7 += fread(a->data, sizeof(char), a->data_len, fh);
-        t7 = t7 == (7 + a->key_len + a->data_len);
+        t7 = t7 == (5 + a->key_len + a->data_len);
         if ( t7 != 1 )
         {
             if ( a->key != NULL )
@@ -104,7 +106,7 @@ npackage * npackage_load(const wchar_t *fp)
         p->assets[k] = *a;
     }
     fclose(fh);
-    if ( t1 && t2 && t3 && t4 && t5 && t6 && t7 )
+    if ( t1 && t2 && t3 && t4 && t5 && t6 && t7 && t8 && t9 )
         return p;
     while ( k >= 0 ) {
         nasset *ah = &p->assets[k];
@@ -131,6 +133,8 @@ uint8_t npackage_save(const wchar_t *fp, npackage *p)
     uint8_t t2 = fwrite(&p->make_time, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t3 = fwrite(&p->mod_time, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t4 = fwrite(&p->mod_count, sizeof(uint64_t), 1, fh) == 1;
+    uint8_t t8 = fwrite(&p->encryption, sizeof(uint8_t), 1, fh) == 1;
+    uint8_t t9 = fwrite(&p->compression, sizeof(uint8_t), 1, fh) == 1;
     uint8_t t5 = fwrite(&p->asset_count, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t6 = fwrite(p->sizes, sizeof(uint64_t), p->asset_count, fh) == p->asset_count;
     uint64_t t7 = 0;
@@ -141,24 +145,27 @@ uint8_t npackage_save(const wchar_t *fp, npackage *p)
         t7 += fwrite(&p->assets[k].mod_time, sizeof(uint64_t), 1, fh);
         t7 += fwrite(&p->assets[k].mod_count, sizeof(uint64_t), 1, fh);
         t7 += fwrite(&p->assets[k].data_len, sizeof(uint64_t), 1, fh);
-        t7 += fwrite(&p->assets[k].encryption, sizeof(uint8_t), 1, fh);
-        t7 += fwrite(&p->assets[k].compression, sizeof(uint8_t), 1, fh);
         t7 += fwrite(&p->assets[k].key_len, sizeof(uint64_t), 1, fh);
         t7 += fwrite(p->assets[k].key, sizeof(wchar_t), p->assets[k].key_len, fh);
         t7 += fwrite(p->assets[k].data, sizeof(char), p->assets[k].data_len, fh);
-        t7 = t7 == (7 + p->assets[k].key_len + p->assets[k].data_len);
+        t7 = t7 == (5 + p->assets[k].key_len + p->assets[k].data_len);
         if ( t7 != 1 )
             break;
     }
     fclose(fh);
-    if ( t1 && t2 && t3 && t4 && t5 && t6 && t7 )
+    if ( t1 && t2 && t3 && t4 && t5 && t6 && t7 && t8 && t9 )
         return 1;
     return 0;
 }
 
-uint8_t nasset_compression(nasset *a)
+uint8_t npackage_compression(npackage *p)
 {
-    return a->compression;
+    return p->compression;
+}
+
+uint8_t npackage_encrypted(npackage *p)
+{
+    return p->encryption;
 }
 
 nasset * nasset_from_disk(const wchar_t *k, const wchar_t *fp)
@@ -208,8 +215,6 @@ nasset *init_nasset(void)
     a->mod_time = 0;
     a->mod_count = 0;
     a->data_len = 0;
-    a->encryption = 0;
-    a->compression = 0;
     a->key = NULL;
     a->key_len = 0;
     a->data = NULL;
