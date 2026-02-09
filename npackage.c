@@ -171,8 +171,7 @@ npackage * npackage_load(const wchar_t *fp)
 
             /*
             the size of wchar_t on the export system
-            is not equal to the size of wchar_t on
-            this runtime system
+            is not equal to the current wchar_t size
             */
             if ( _szwc != _szcw )
             {
