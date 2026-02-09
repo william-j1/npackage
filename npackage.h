@@ -187,7 +187,7 @@ uint64_t npackage_header_size(npackage *p);
 /*
 load package from disk file
 */
-npackage * npackage_load(const wchar_t *fp);
+npackage * npackage_open(const wchar_t *fp);
 
 /*
 flush package into disk file

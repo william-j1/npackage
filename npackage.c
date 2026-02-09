@@ -52,7 +52,7 @@ uint64_t npackage_header_size(npackage *p)
     return s;
 }
 
-npackage * npackage_load(const wchar_t *fp)
+npackage * npackage_open(const wchar_t *fp)
 {
 	FILE *fh;
 	npackage *p = new_npackage();

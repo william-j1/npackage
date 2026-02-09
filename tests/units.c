@@ -212,7 +212,7 @@ void iut4()
 	nasset_insert(p, a1);
 	printf("export sum: %d\n", npackage_save(fp, p));
 
-    npackage *q = npackage_load(fp);
+    npackage *q = npackage_open(fp);
     if ( q != NULL )
         printf("asset count: %d\n", q->asset_count);
     else
