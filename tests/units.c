@@ -217,7 +217,7 @@ void iut4()
         printf("asset count: %d\n", q->asset_count);
     else
         printf("load failed");
-    assert(p->assets[0].data[0] == d1[0]);
+    assert(q->assets[0].data[0] == d1[0]);
 
 	free(fp);
 	free(k1);
