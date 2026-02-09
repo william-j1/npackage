@@ -142,7 +142,7 @@ npackage * npackage_open(const wchar_t *fp)
         t7 += fread(a->key, sizeof(wchar_t), a->key_len, fh);
         a->data = (unsigned char*)malloc(sizeof(char) * a->data_len);
         t7 += fread(a->data, sizeof(char), a->data_len, fh);
-        
+
         /*
         integrity check
         */
@@ -252,6 +252,25 @@ uint8_t npackage_save(const wchar_t *fp, npackage *p)
     if ( t1 && t2 && t3 && t4 && t5 && t6 && t7 && t8 && t9 && t10 && t11 )
         return 1;
     return 0;
+}
+
+uint8_t npackage_close(npackage *p)
+{
+    for ( uint64_t q = 0; q < p->asset_count; q++ )
+    {
+        nasset *a = &p->assets[q];
+        if ( a->key != NULL )
+            free(a->key);
+        if ( a->data != NULL )
+            free(a->data);
+        free(a);
+    }
+    if ( p->sizes != NULL )
+        free(p->sizes);
+    if ( p->assets != NULL )
+        free(p->assets);
+    free(p);
+    return 1;
 }
 
 uint8_t npackage_compression(npackage *p)

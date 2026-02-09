@@ -165,6 +165,11 @@ assemble an empty package
 npackage *new_npackage(void);
 
 /*
+close the package
+*/
+uint8_t npackage_close(npackage *p);
+
+/*
 signals whether package p is compressed
 */
 uint8_t npackage_compression(npackage *p);
