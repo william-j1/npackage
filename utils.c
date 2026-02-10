@@ -26,7 +26,7 @@ uint8_t is_be()
     return (uint8_t)_be;
 }
 
-uint64_t u64fswap_endian(uint64_t v)
+uint64_t u64swap_endian(uint64_t v)
 {
 #ifdef __GNUC__
     return __builtin_bswap64(v);

@@ -117,10 +117,10 @@ npackage * npackage_open(const wchar_t *fp)
     */
     if ( _be != _eibe )
     {
-        p->make_time = u64fswap_endian(p->make_time);
-        p->mod_time = u64fswap_endian(p->mod_time);
-        p->mod_count = u64fswap_endian(p->mod_count);
-        p->asset_count = u64fswap_endian(p->asset_count);
+        p->make_time = u64swap_endian(p->make_time);
+        p->mod_time = u64swap_endian(p->mod_time);
+        p->mod_count = u64swap_endian(p->mod_count);
+        p->asset_count = u64swap_endian(p->asset_count);
     }
 
     p->sizes = (uint64_t*)malloc(sizeof(uint64_t) * p->asset_count);
@@ -162,12 +162,12 @@ npackage * npackage_open(const wchar_t *fp)
         */
         if ( _be != _eibe )
         {
-            a->make_time = u64fswap_endian(a->make_time);
-            a->mod_time = u64fswap_endian(a->mod_time);
-            a->mod_count = u64fswap_endian(a->mod_count);
-            a->data_len = u64fswap_endian(a->data_len);
-            a->key_len = u64fswap_endian(a->key_len);
-            p->sizes[k] = u64fswap_endian(p->sizes[k]);
+            a->make_time = u64swap_endian(a->make_time);
+            a->mod_time = u64swap_endian(a->mod_time);
+            a->mod_count = u64swap_endian(a->mod_count);
+            a->data_len = u64swap_endian(a->data_len);
+            a->key_len = u64swap_endian(a->key_len);
+            p->sizes[k] = u64swap_endian(p->sizes[k]);
             for ( uint64_t j = 0; j < a->key_len; j++ )
             {
                 if ( _szcw == 2 )
