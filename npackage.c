@@ -91,7 +91,9 @@ npackage * npackage_open(const wchar_t *fp)
     */
     uint8_t _szwc;
 
-    
+    /*
+    encoded in big endian flag
+    */
     uint8_t t10 = fread(&_eibe, sizeof(uint8_t), 1, fh) == 1;
 
     /*
