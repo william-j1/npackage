@@ -8,7 +8,7 @@ Package management standard for assets and datasets.
 Objective
 =========
 
-Safe wrapper for the distribution of assets enclosed in multimedia projects. This includes bitmaps, audio, numberic and geometic datasets distributed with large projects such as cloud  enabled platform data exchange and video game engine pipelines for complex asset types.
+Safe wrapper for the distribution of assets enclosed in multimedia projects. This includes bitmaps, audio, numeric and geometic datasets distributed with large projects such as cloud  enabled platform data exchange and video game engine pipelines for complex asset types.
 
 License
 =======
