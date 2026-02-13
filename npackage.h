@@ -115,7 +115,7 @@ typedef struct
 	/*
 	dataset assets
 	*/
-	nasset *assets;
+	nasset **assets;
 }
 npackage;
 
@@ -123,6 +123,11 @@ npackage;
 assemble an empty asset
 */
 nasset *new_nasset(void);
+
+/*
+nasset comparison
+*/
+int8_t nasset_cmp(nasset *p, nasset *q);
 
 /*
 delete the asset from the package
@@ -153,6 +158,11 @@ uint64_t nasset_size(nasset *a);
 size of all assets
 */
 uint64_t nassets_size(npackage *p);
+
+/*
+close nasset
+*/
+uint8_t nasset_close(nasset *a);
 
 /*
 unset the asset from the package
@@ -207,6 +217,7 @@ uint64_t npackage_size(npackage *p);
 /*
 set an assets (key, value) given an asset a
 - the existing key should it exist will be freed
+- the existing value should it exist will be freed
 */
 uint8_t nasset_set_key(nasset *a, const wchar_t *k);
 uint8_t nasset_set_value(nasset *a, unsigned char *v, uint64_t len);

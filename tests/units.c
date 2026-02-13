@@ -3,7 +3,6 @@
 #include <wchar.h>
 #include <locale.h>
 #include <assert.h>
-
 #include "npackage.h"
 
 /*
@@ -12,26 +11,23 @@ integrity unit test 1
 void iut1(void)
 {
 	npackage *p = new_npackage();
-	nasset * a1 = new_nasset();
-	nasset * a2 = new_nasset();
-	nasset * a3 = new_nasset();
-	nasset * a4 = new_nasset();
-	nasset * a5 = new_nasset();
-
+	nasset *a1 = new_nasset();
+	nasset *a2 = new_nasset();
+	nasset *a3 = new_nasset();
+	nasset *a4 = new_nasset();
+	nasset *a5 = new_nasset();
 	printf("package size: %d\n", npackage_size(p));
 	printf("a1 asset size: %d\n", nasset_size(a1));
 	printf("a2 asset size: %d\n", nasset_size(a2));
 	printf("a3 asset size: %d\n", nasset_size(a3));
 	printf("a4 asset size: %d\n", nasset_size(a4));
 	printf("a5 asset size: %d\n", nasset_size(a5));
-
 	size_t l = 50;
 	wchar_t *k1 = (wchar_t *)malloc(l * sizeof(wchar_t));
 	wchar_t *k2 = (wchar_t *)malloc(l * sizeof(wchar_t));
 	wchar_t *k3 = (wchar_t *)malloc(l * sizeof(wchar_t));
 	wchar_t *k4 = (wchar_t *)malloc(l * sizeof(wchar_t));
 	wchar_t *k5 = (wchar_t *)malloc(l * sizeof(wchar_t));
-
 	wcsncpy(k1, L"key1", l);
 	wcsncpy(k2, L"key22", l);
 	wcsncpy(k3, L"key333", l);
@@ -52,7 +48,6 @@ void iut1(void)
 	unsigned char *d3 = (unsigned char *)malloc(3 * sizeof(unsigned char));
 	unsigned char *d4 = (unsigned char *)malloc(4 * sizeof(unsigned char));
 	unsigned char *d5 = (unsigned char *)malloc(5 * sizeof(unsigned char));
-
 	d1[0] = 0;
 	d2[0] = 1;
 	d2[1] = 1;
@@ -68,40 +63,33 @@ void iut1(void)
 	d5[2] = 4;
 	d5[3] = 4;
 	d5[4] = 4;
-
 	nasset_set_key(a1, k1);
 	nasset_set_value(a1, d1, 1);
 	nasset_insert(p, a1);
 	printf("package size: %d\n", npackage_size(p));
 	printf("a1 asset size: %d\n", nasset_size(a1));
-
 	nasset_set_key(a2, k2);
 	nasset_set_value(a2, d2, 2);
 	nasset_insert(p, a2);
 	printf("package size: %d\n", npackage_size(p));
 	printf("a2 asset size: %d\n", nasset_size(a2));
-
 	nasset_set_key(a3, k3);
 	nasset_set_value(a3, d3, 3);
 	nasset_insert(p, a3);
 	printf("package size: %d\n", npackage_size(p));
 	printf("a3 asset size: %d\n", nasset_size(a3));
-
 	nasset_set_key(a4, k4);
 	nasset_set_value(a4, d4, 4);
 	nasset_insert(p, a4);
 	printf("package size: %d\n", npackage_size(p));
 	printf("a4 asset size: %d\n", nasset_size(a4));
-
 	nasset_set_key(a5, k5);
 	nasset_set_value(a5, d5, 5);
 	nasset_insert(p, a5);
 	printf("package size: %d\n", npackage_size(p));
 	printf("a5 asset size: %d\n", nasset_size(a5));
-
 	printf("header size %d\n", npackage_header_size(p));
 	printf("asset sizes: %d\n", nassets_size(p));
-
 	assert(npackage_size(p) == npackage_header_size(p) + nassets_size(p));
 	free(d1);
 	free(d2);
@@ -143,11 +131,11 @@ void iut2(void)
 
 	nasset_set_key(a1, k1);
 	nasset_set_value(a1, d1, 4);
+
 	/*
 	mods only tracked after first set
 	*/
 	assert(a1->mod_count == 0);
-
 	nasset_insert(p, a1);
 	assert(npackage_has_key(p, k2) != 0);
 	nasset *a2 = nasset_get(p, k2);
@@ -166,7 +154,7 @@ void iut2(void)
 /*
 integrity unit test 3
 */
-void iut3()
+void iut3(void)
 {
 	wchar_t *k1 = (wchar_t *)malloc(4 * sizeof(wchar_t));
 	wchar_t *fp1 = (wchar_t *)malloc(13 * sizeof(wchar_t));
@@ -194,7 +182,7 @@ void iut3()
 /*
 integrity unit test 4
 */
-void iut4()
+void iut4(void)
 {
 	wchar_t *fp = (wchar_t *)malloc(13 * sizeof(wchar_t));
 	wcsncpy(fp, L"tests\\iut4_1", 13);
@@ -211,19 +199,15 @@ void iut4()
 	nasset_set_value(a1, d1, 1);
 	nasset_insert(p, a1);
 	printf("export sum: %d\n", npackage_save(fp, p));
-
     npackage *q = npackage_open(fp);
     if ( q != NULL )
         printf("asset count: %d\n", q->asset_count);
     else
         printf("load failed");
-    assert(q->assets[0].data[0] == d1[0]);
-
+    assert(q->assets[0]->data[0] == d1[0]);
 	free(fp);
-	free(k1);
-	free(d1);
-	free(a1);
-	free(p);
+	npackage_close(p);
+	npackage_close(q);
 }
 
 /*
@@ -237,21 +221,18 @@ void iut5(void)
 	nasset * a3 = new_nasset();
 	nasset * a4 = new_nasset();
 	nasset * a5 = new_nasset();
-
 	printf("package size: %d\n", npackage_size(p));
 	printf("a1 asset size: %d\n", nasset_size(a1));
 	printf("a2 asset size: %d\n", nasset_size(a2));
 	printf("a3 asset size: %d\n", nasset_size(a3));
 	printf("a4 asset size: %d\n", nasset_size(a4));
 	printf("a5 asset size: %d\n", nasset_size(a5));
-
 	size_t l = 50;
 	wchar_t *k1 = (wchar_t *)malloc(l * sizeof(wchar_t));
 	wchar_t *k2 = (wchar_t *)malloc(l * sizeof(wchar_t));
 	wchar_t *k3 = (wchar_t *)malloc(l * sizeof(wchar_t));
 	wchar_t *k4 = (wchar_t *)malloc(l * sizeof(wchar_t));
 	wchar_t *k5 = (wchar_t *)malloc(l * sizeof(wchar_t));
-
 	wcsncpy(k1, L"key1", l);
 	wcsncpy(k2, L"key22", l);
 	wcsncpy(k3, L"key333", l);
@@ -272,7 +253,6 @@ void iut5(void)
 	unsigned char *d3 = (unsigned char *)malloc(3 * sizeof(unsigned char));
 	unsigned char *d4 = (unsigned char *)malloc(4 * sizeof(unsigned char));
 	unsigned char *d5 = (unsigned char *)malloc(5 * sizeof(unsigned char));
-
 	d1[0] = 0;
 	d2[0] = 1;
 	d2[1] = 1;
@@ -288,64 +268,85 @@ void iut5(void)
 	d5[2] = 4;
 	d5[3] = 4;
 	d5[4] = 4;
-
 	nasset_set_key(a1, k1);
 	nasset_set_value(a1, d1, 1);
 	nasset_insert(p, a1);
 	printf("package size: %d\n", npackage_size(p));
 	printf("a1 asset size: %d\n", nasset_size(a1));
-
 	nasset_set_key(a2, k2);
 	nasset_set_value(a2, d2, 2);
 	nasset_insert(p, a2);
 	printf("package size: %d\n", npackage_size(p));
 	printf("a2 asset size: %d\n", nasset_size(a2));
-
 	nasset_set_key(a3, k3);
 	nasset_set_value(a3, d3, 3);
 	nasset_insert(p, a3);
 	printf("package size: %d\n", npackage_size(p));
 	printf("a3 asset size: %d\n", nasset_size(a3));
-
 	nasset_set_key(a4, k4);
 	nasset_set_value(a4, d4, 4);
 	nasset_insert(p, a4);
 	printf("package size: %d\n", npackage_size(p));
 	printf("a4 asset size: %d\n", nasset_size(a4));
-
 	nasset_set_key(a5, k5);
 	nasset_set_value(a5, d5, 5);
 	nasset_insert(p, a5);
 	printf("package size: %d\n", npackage_size(p));
 	printf("a5 asset size: %d\n", nasset_size(a5));
-
 	printf("header size %d\n", npackage_header_size(p));
 	printf("asset sizes: %d\n", nassets_size(p));
-
 	for ( uint64_t n = 0; n < p->asset_count; n++ )
 		printf("sizes: %d\n", p->sizes[n]);
 	assert(npackage_size(p) == npackage_header_size(p) + nassets_size(p));
 	printf("asset count before unset: %d\n", p->asset_count);
 	a3 = nasset_unset(p, k3);
+	assert(a3 != NULL);
 	printf("asset count _after unset: %d\n", p->asset_count);
 	assert(npackage_size(p) == npackage_header_size(p) + nassets_size(p));
 	for ( uint64_t n = 0; n < p->asset_count; n++ )
 		printf("sizes: %d\n", p->sizes[n]);
+	printf("a3 asset size: %d\n", nasset_size(a3));
+	nasset_close(a3);
+	printf("e");
+	npackage_close(p);
+}
 
-	free(d1);
-	free(d2);
-	free(d3);
-	free(d4);
-	free(d5);
-    free(k1);
-	free(k2);
-	free(k3);
-	free(k4);
-	free(k5);
-	free(a1);
-	free(a2);
-	free(a3);
-	free(a4);
-	free(a5);
-	free(p);
+/*
+integrity unit test 6
+*/
+void iut6(void)
+{
+	nasset *a1 = new_nasset();
+	nasset *a2 = new_nasset();
+	wchar_t *k1 = (wchar_t *)malloc(5 * sizeof(wchar_t));
+	wchar_t *k2 = (wchar_t *)malloc(5 * sizeof(wchar_t));
+	wcsncpy(k1, L"key1", 5);
+	wcsncpy(k2, L"key2", 5);
+    k1[4] = L'\0';
+	k2[4] = L'\0';
+    wprintf(L"0 : %ls\n", k1);
+	wprintf(L"1 : %ls\n", k2);
+	unsigned char *d1 = (unsigned char *)malloc(1 * sizeof(unsigned char));
+	unsigned char *d2 = (unsigned char *)malloc(1 * sizeof(unsigned char));
+	d1[0] = 0;
+	d2[0] = 0;
+	uint8_t c1 = nasset_set_key(a1, k1);
+	uint8_t c2 = nasset_set_key(a2, k2);
+	uint8_t c3 = nasset_set_value(a1, d1, 1);
+	uint8_t c4 = nasset_set_value(a2, d2, 1);
+	assert(c1 == c2);
+	assert(c3 == c4);
+	assert(nasset_cmp(a1, a2) != 0);
+	/* change '2' to '1' */
+	a2->key[3] = 49;
+	assert(nasset_cmp(a1, a2) == 0);
+	printf("unit: %d", nasset_cmp(a1, a2));
+	nasset_close(a1);
+	nasset_close(a2);
+}
+
+void iut7(void)
+{
+	nasset * a1 = new_nasset();
+	nasset_close(a1);
 }

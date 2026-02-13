@@ -35,7 +35,7 @@ npackage *new_npackage(void)
 uint8_t npackage_has_key(npackage *p, const wchar_t *k)
 {
     for ( uint64_t q = 0; q < p->asset_count; q++ ) {
-        if ( wcscmp(p->assets[q].key, k) == 0 )
+        if ( wcscmp(p->assets[q]->key, k) == 0 )
             return 1;
     }
     return 0;
@@ -126,7 +126,7 @@ npackage * npackage_open(const wchar_t *fp)
     }
 
     p->sizes = (uint64_t*)malloc(sizeof(uint64_t) * p->asset_count);
-    p->assets = (nasset*)malloc(sizeof(nasset) * p->asset_count);
+    p->assets = (nasset**)malloc(sizeof(nasset) * p->asset_count);
     uint8_t t6 = fread(p->sizes, sizeof(uint64_t), p->asset_count, fh) == p->asset_count;
 
     uint64_t t7 = 0;
@@ -184,7 +184,7 @@ npackage * npackage_open(const wchar_t *fp)
         and seat asset to index
         */
         a->package = p;
-        p->assets[k] = *a;
+        p->assets[k] = a;
     }
     fclose(fh);
 
@@ -198,7 +198,7 @@ npackage * npackage_open(const wchar_t *fp)
     ... integrity fail, cleanse structs
     */
     while ( k >= 0 ) {
-        nasset *ah = &p->assets[k];
+        nasset *ah = p->assets[k];
         if ( ah->key != NULL )
             free(ah->key);
         if ( ah->data != NULL )
@@ -208,7 +208,6 @@ npackage * npackage_open(const wchar_t *fp)
     }
     free(p->assets);
     free(p->sizes);
-    free(p);
     return NULL;
 }
 
@@ -227,7 +226,7 @@ uint8_t npackage_save(const wchar_t *fp, npackage *p)
 
     uint8_t t1 = fwrite(sig, sizeof(uint8_t), 7, fh) == 7;
     uint8_t t10 = fwrite(&_be, sizeof(uint8_t), 1, fh) == 1;
-    uint8_t t11 = fwrite(&_szws, sizeof(wchar_t), 1, fh) == 1;
+    uint8_t t11 = fwrite(&_szws, sizeof(uint8_t), 1, fh) == 1;
     uint8_t t2 = fwrite(&p->make_time, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t3 = fwrite(&p->mod_time, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t4 = fwrite(&p->mod_count, sizeof(uint64_t), 1, fh) == 1;
@@ -238,15 +237,15 @@ uint8_t npackage_save(const wchar_t *fp, npackage *p)
     uint64_t t7 = 0;
     nasset *a;
     for ( uint64_t k = 0; k < p->asset_count; k++ ) {
-        a = &p->assets[k];
-        t7 += fwrite(&p->assets[k].make_time, sizeof(uint64_t), 1, fh);
-        t7 += fwrite(&p->assets[k].mod_time, sizeof(uint64_t), 1, fh);
-        t7 += fwrite(&p->assets[k].mod_count, sizeof(uint64_t), 1, fh);
-        t7 += fwrite(&p->assets[k].data_len, sizeof(uint64_t), 1, fh);
-        t7 += fwrite(&p->assets[k].key_len, sizeof(uint64_t), 1, fh);
-        t7 += fwrite(p->assets[k].key, sizeof(wchar_t), p->assets[k].key_len, fh);
-        t7 += fwrite(p->assets[k].data, sizeof(char), p->assets[k].data_len, fh);
-        t7 = t7 == (5 + p->assets[k].key_len + p->assets[k].data_len);
+        a = p->assets[k];
+        t7 += fwrite(&p->assets[k]->make_time, sizeof(uint64_t), 1, fh);
+        t7 += fwrite(&p->assets[k]->mod_time, sizeof(uint64_t), 1, fh);
+        t7 += fwrite(&p->assets[k]->mod_count, sizeof(uint64_t), 1, fh);
+        t7 += fwrite(&p->assets[k]->data_len, sizeof(uint64_t), 1, fh);
+        t7 += fwrite(&p->assets[k]->key_len, sizeof(uint64_t), 1, fh);
+        t7 += fwrite(p->assets[k]->key, sizeof(wchar_t), p->assets[k]->key_len, fh);
+        t7 += fwrite(p->assets[k]->data, sizeof(char), p->assets[k]->data_len, fh);
+        t7 = t7 == (5 + p->assets[k]->key_len + p->assets[k]->data_len);
         if ( t7 != 1 )
             break;
     }
@@ -260,7 +259,7 @@ uint8_t npackage_close(npackage *p)
 {
     for ( uint64_t q = 0; q < p->asset_count; q++ )
     {
-        nasset *a = &p->assets[q];
+        nasset *a = p->assets[q];
         if ( a->key != NULL )
             free(a->key);
         if ( a->data != NULL )
@@ -285,17 +284,50 @@ uint8_t npackage_encrypted(npackage *p)
     return p->encryption;
 }
 
+uint8_t nasset_close(nasset *a)
+{
+    if ( a == NULL )
+        return 0;
+    if ( a->key != NULL ) {
+        free(a->key);
+        a->key = NULL;
+    }
+    if ( a->data != NULL ) {
+        free(a->data);
+        a->data = NULL;
+    }
+    free(a);
+    return 1;
+}
+
+int8_t nasset_cmp(nasset *p, nasset *q)
+{
+    int8_t t1 = p->make_time > q->make_time ? 1 : ( p->make_time < q->make_time ? -1 : 0 );
+    int8_t t2 = p->mod_time > q->mod_time ? 1 : ( p->mod_time < q->mod_time ? -1 : 0 );
+    int8_t t3 = p->mod_count > q->mod_count ? 1 : ( p->mod_count < q->mod_count ? -1 : 0 );
+    int8_t t4 = p->data_len > q->data_len ? 1 : ( p->data_len < q->data_len ? -1 : 0 );
+    int8_t t5 = p->key_len > q->key_len ? 1 : ( p->key_len < q->key_len ? -1 : 0 );
+    if ( t1 != 0 )
+        return t1;
+    if ( t2 != 0 )
+        return t2;
+    if ( t3 != 0 )
+        return t3;
+    if ( t4 != 0 )
+        return t4;
+    if ( t5 != 0 )
+        return t5;
+    t1 = arrcmp((uint8_t*)p->key, (uint8_t*)q->key, p->key_len);
+    if ( t1 != 0 )
+        return t1;
+    t1 = arrcmp((uint8_t*)p->data, (uint8_t*)q->data, p->data_len);
+    return t1;
+}
+
 uint8_t nasset_delete(npackage *p, const wchar_t *k)
 {
     nasset *a = nasset_unset(p, k);
-    if ( a == NULL )
-        return 0;
-    if ( a->key != NULL )
-        free(a->key);
-    if ( a->data != NULL )
-        free(a->data);
-    free(a);
-    return 1;
+    return nasset_close(a);
 }
 
 nasset * nasset_from_disk(const wchar_t *k, const wchar_t *fp)
@@ -331,8 +363,8 @@ nasset * nasset_from_disk(const wchar_t *k, const wchar_t *fp)
 nasset *nasset_get(npackage *p, const wchar_t *k)
 {
     for ( uint64_t q = 0; q < p->asset_count; q++ ) {
-        if ( wcscmp(p->assets[q].key, k) == 0 )
-            return &p->assets[q];
+        if ( wcscmp(p->assets[q]->key, k) == 0 )
+            return p->assets[q];
     }
     return NULL;
 }
@@ -361,6 +393,7 @@ uint8_t nasset_set_key(nasset *a, const wchar_t *k)
     if ( a->key != NULL )
     {
         free(a->key);
+
         /*
         modifications are only tracked
         after a key is first assigned
@@ -387,8 +420,11 @@ uint8_t nasset_set_value(nasset *a, unsigned char *v, uint64_t len)
     {
         a->mod_count++;
         a->mod_time = time(NULL);
-        free(a->data);
     }
+
+    /* dealloc */
+    if ( a->data != NULL )
+        free(a->data);
 
     npackage* p = (npackage*)a->package;
     a->data = v;
@@ -427,7 +463,7 @@ uint64_t nassets_size(npackage *p)
 {
     uint64_t s = 0;
     for ( uint64_t k = 0; k < p->asset_count; k++ )
-        s += nasset_size(&p->assets[k]);
+        s += nasset_size(p->assets[k]);
     return s;
 }
 
@@ -445,15 +481,15 @@ uint8_t nasset_insert(npackage *p, nasset *a)
     p->sizes = ps;
     p->sizes[p->asset_count-1] = nasset_size(a);
 
-    nasset *pa;
+    nasset **pa;
     if ( p->assets != NULL )
-        pa = (nasset*)realloc(p->assets, p->asset_count * sizeof(nasset));
+        pa = (nasset**)realloc(p->assets, p->asset_count * sizeof(nasset));
     else
-        pa = (nasset*)malloc(sizeof(nasset));
+        pa = (nasset**)malloc(sizeof(nasset));
     if ( pa == NULL )
         return 0;
     p->assets = pa;
-    p->assets[p->asset_count-1] = *a;
+    p->assets[p->asset_count-1] = a;
 
     p->mod_time = time(NULL);
     p->mod_count++;
@@ -465,9 +501,9 @@ nasset* nasset_unset(npackage *p, const wchar_t *k)
 {
     for ( uint64_t q = 0; q < p->asset_count; q++ )
     {
-        if ( wcscmp(p->assets[q].key, k) == 0 )
+        if ( wcscmp(p->assets[q]->key, k) == 0 )
         {
-            nasset* a = &p->assets[q];
+            nasset *a = p->assets[q];
             uint64_t ac = p->asset_count;
             uint64_t k = 0;
 
@@ -476,7 +512,7 @@ nasset* nasset_unset(npackage *p, const wchar_t *k)
 
             p->asset_count--;
             uint64_t* sz = (uint64_t*)malloc(p->asset_count * sizeof(uint64_t));
-            nasset* pa = (nasset*)malloc(p->asset_count * sizeof(nasset));
+            nasset** pa = (nasset**)malloc(p->asset_count * sizeof(nasset));
 
             /*
             reassign, skip over q
@@ -497,8 +533,7 @@ nasset* nasset_unset(npackage *p, const wchar_t *k)
             p->sizes = sz;
             p->assets = pa;
             return a;
-        }
-    }
+    }}
     return NULL;
 }
 
@@ -512,6 +547,6 @@ uint64_t npackage_size(npackage *p)
     /* += nasset_size */
     s+= sizeof(nasset*) * p->asset_count;
     for ( uint64_t k = 0; k < p->asset_count; k++ )
-        s += nasset_size(&p->assets[k]);
+        s += nasset_size(p->assets[k]);
     return s;
 }
