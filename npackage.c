@@ -387,6 +387,7 @@ uint8_t nasset_set_value(nasset *a, unsigned char *v, uint64_t len)
     {
         a->mod_count++;
         a->mod_time = time(NULL);
+        free(a->data);
     }
 
     npackage* p = (npackage*)a->package;
