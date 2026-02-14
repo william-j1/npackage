@@ -137,7 +137,7 @@ uint8_t nasset_delete(npackage *p, const wchar_t *k);
 /*
 load asset from disk
 */
-nasset * nasset_from_disk(const wchar_t *k, const wchar_t *fp);
+nasset * nasset_from_local(const wchar_t *k, const wchar_t *fp);
 
 /*
 get/fetch asset from package p given a key k

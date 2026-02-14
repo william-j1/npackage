@@ -330,7 +330,7 @@ uint8_t nasset_delete(npackage *p, const wchar_t *k)
     return nasset_close(a);
 }
 
-nasset * nasset_from_disk(const wchar_t *k, const wchar_t *fp)
+nasset * nasset_from_local(const wchar_t *k, const wchar_t *fp)
 {
     nasset *a = new_nasset();
     FILE *fh = _wfopen(fp, L"rb");
