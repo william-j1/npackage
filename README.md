@@ -41,7 +41,7 @@ int main(void)
 }
 ```
 
-... replacing `d`, `data_len` and `fp` with a unsigned byte array, array size and file path respectively.
+... replacing `d`, `data_len` and `fp` with an unsigned byte array, array size and file path respectively.
 
 License
 =======
