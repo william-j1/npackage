@@ -109,7 +109,6 @@ void iut2(void)
 {
 	npackage *p = new_npackage();
 	nasset *a1 = new_nasset();
-
 	wchar_t *k1 = (wchar_t *)malloc(5 * sizeof(wchar_t));
 	wchar_t *k2 = (wchar_t *)malloc(5 * sizeof(wchar_t));
 	wcsncpy(k1, L"key1", 4);
@@ -121,10 +120,8 @@ void iut2(void)
 	d1[1] = 1;
 	d1[2] = 2;
 	d1[3] = 0;
-
 	nasset_set_key(a1, k1);
 	nasset_set_value(a1, d1, 4);
-
 	/*
 	mods only tracked after first set
 	*/
