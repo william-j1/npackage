@@ -30,13 +30,16 @@ uint64_t u64swap_endian(uint64_t v)
 {
 #ifdef __GNUC__
     return __builtin_bswap64(v);
+#elif _MSC_VER
+    return _byteswap_uint64(v);
+#else
+    return v >> 56
+         | ((v >> 40) & 0xff00)
+         | ((v >> 24) & 0xff0000)
+         | ((v >> 8) & 0xff000000)
+         | ((v << 8) & 0xff00000000)
+         | ((v << 24) & 0xff0000000000)
+         | ((v << 40) & 0xff000000000000)
+         | v << 56;
 #endif
-    return ((v & 0x00000000000000FFULL) << 56) |
-           ((v & 0x000000000000FF00ULL) << 40) |
-           ((v & 0x00000000FF000000ULL) << 24) |
-           ((v & 0x00FF000000000000ULL) << 8)  |
-           ((v & 0x000000FF00000000ULL) >> 8)  |
-           ((v & 0x0000FF0000000000ULL) >> 24) |
-           ((v & 0xFF00000000000000ULL) >> 40) |
-           ((v & 0x000000000000FF00ULL) >> 56);
 }

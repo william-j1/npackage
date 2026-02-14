@@ -317,7 +317,7 @@ void iut6(void)
 	/* change '2' to '1' */
 	a2->key[3] = 49;
 	assert(nasset_cmp(a1, a2) == 0);
-	printf("unit: %d", nasset_cmp(a1, a2));
+	printf("unit: %d\n", nasset_cmp(a1, a2));
 	nasset_close(a1);
 	nasset_close(a2);
 }
@@ -325,4 +325,31 @@ void iut7(void)
 {
 	nasset * a1 = new_nasset();
 	nasset_close(a1);
+}
+void iut8(void)
+{
+	uint64_t v = 1;
+	v = v >> 56
+         | ((v >> 40) & 0xff00)
+         | ((v >> 24) & 0xff0000)
+         | ((v >> 8) & 0xff000000)
+         | ((v << 8) & 0xff00000000)
+         | ((v << 24) & 0xff0000000000)
+         | ((v << 40) & 0xff000000000000)
+         | v << 56;
+	assert(v == 72057594037927936ULL);
+	printf("swap 1: %lld\n", v);
+	printf("swap 2: %lld\n", __builtin_bswap64(1));
+	v = 5984735;
+	v = v >> 56
+         | ((v >> 40) & 0xff00)
+         | ((v >> 24) & 0xff0000)
+         | ((v >> 8) & 0xff000000)
+         | ((v << 8) & 0xff00000000)
+         | ((v << 24) & 0xff0000000000)
+         | ((v << 40) & 0xff000000000000)
+         | v << 56; 
+	printf("swap 3: %lld\n", v);
+	printf("swap 4: %lld\n", __builtin_bswap64(5984735));
+	assert(5984735 == u64swap_endian(u64swap_endian(5984735)));
 }
