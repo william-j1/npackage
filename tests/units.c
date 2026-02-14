@@ -5,9 +5,6 @@
 #include <assert.h>
 #include "npackage.h"
 
-/*
-integrity unit test 1
-*/
 void iut1(void)
 {
 	npackage *p = new_npackage();
@@ -108,10 +105,6 @@ void iut1(void)
 	free(a5);
 	free(p);
 }
-
-/*
-integrity unit test 2
-*/
 void iut2(void)
 {
 	npackage *p = new_npackage();
@@ -150,10 +143,6 @@ void iut2(void)
 	free(k2);
 	free(p);
 }
-
-/*
-integrity unit test 3
-*/
 void iut3(void)
 {
 	wchar_t *k1 = (wchar_t *)malloc(4 * sizeof(wchar_t));
@@ -178,10 +167,6 @@ void iut3(void)
 	free(fp1);
 	free(k1);
 }
-
-/*
-integrity unit test 4
-*/
 void iut4(void)
 {
 	wchar_t *fp = (wchar_t *)malloc(13 * sizeof(wchar_t));
@@ -209,10 +194,6 @@ void iut4(void)
 	npackage_close(p);
 	npackage_close(q);
 }
-
-/*
-integrity unit test 5
-*/
 void iut5(void)
 {
 	npackage *p = new_npackage();
@@ -310,10 +291,6 @@ void iut5(void)
 	printf("e");
 	npackage_close(p);
 }
-
-/*
-integrity unit test 6
-*/
 void iut6(void)
 {
 	nasset *a1 = new_nasset();
@@ -344,7 +321,6 @@ void iut6(void)
 	nasset_close(a1);
 	nasset_close(a2);
 }
-
 void iut7(void)
 {
 	nasset * a1 = new_nasset();
