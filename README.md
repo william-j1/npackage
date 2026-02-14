@@ -32,7 +32,7 @@ int main(void)
   nasset *a = new_nasset();
   wchar_t *k = (wchar_t *)malloc(6 * sizeof(wchar_t));
   wcsncpy(k, L"uid_n", 6);
-  k1[5] = L'\0';
+  k[5] = L'\0';
   nasset_set_key(a, k);
   nasset_set_value(a, d, data_len);
   nasset_insert(p, a);
