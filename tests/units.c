@@ -148,7 +148,7 @@ void iut3(void)
 	wcsncpy(fp1, L"tests\\iut3_1", 13);
 	k1[3] = L'\0';
     fp1[12] = L'\0';
-	nasset *a = nasset_from_disk(k1, fp1);
+	nasset *a = nasset_from_local(k1, fp1);
 	printf("%d bytes\n", a->data_len);
 	wprintf(L"0 => %d\n", a->data[0]);
 	wprintf(L"1 => %d\n", a->data[1]);
@@ -188,6 +188,7 @@ void iut4(void)
         printf("load failed");
     assert(q->assets[0]->data[0] == d1[0]);
 	free(fp);
+	free(k1);
 	npackage_close(p);
 	npackage_close(q);
 }
@@ -287,6 +288,11 @@ void iut5(void)
 	nasset_close(a3);
 	printf("e");
 	npackage_close(p);
+	free(k1);
+	free(k2);
+	free(k3);
+	free(k4);
+	free(k5);
 }
 void iut6(void)
 {
@@ -298,8 +304,8 @@ void iut6(void)
 	wcsncpy(k2, L"key2", 5);
     k1[4] = L'\0';
 	k2[4] = L'\0';
-    wprintf(L"0 : %ls\n", k1);
-	wprintf(L"1 : %ls\n", k2);
+    wprintf(L"x0 : %ls\n", k1);
+	wprintf(L"x1 : %ls\n", k2);
 	unsigned char *d1 = (unsigned char *)malloc(1 * sizeof(unsigned char));
 	unsigned char *d2 = (unsigned char *)malloc(1 * sizeof(unsigned char));
 	d1[0] = 0;
@@ -313,10 +319,16 @@ void iut6(void)
 	assert(nasset_cmp(a1, a2) != 0);
 	/* change '2' to '1' */
 	a2->key[3] = 49;
+
+	printf("%d %d %d %d\n",a1->key[0], a1->key[1], a1->key[2], a1->key[3]);
+	printf("%d %d %d %d\n",a2->key[0], a2->key[1], a2->key[2], a2->key[3]);
+
 	assert(nasset_cmp(a1, a2) == 0);
 	printf("unit: %d\n", nasset_cmp(a1, a2));
 	nasset_close(a1);
 	nasset_close(a2);
+	free(k1);
+	free(k2);
 }
 void iut7(void)
 {

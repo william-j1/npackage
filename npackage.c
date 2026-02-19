@@ -34,11 +34,25 @@ npackage *new_npackage(void)
 
 uint8_t npackage_has_key(npackage *p, const wchar_t *k)
 {
-    for ( uint64_t q = 0; q < p->asset_count; q++ ) {
-        if ( wcscmp(p->assets[q]->key, k) == 0 )
-            return 1;
+    uint8_t _match = 1;
+    uint64_t len = wcslen(k);
+    nwide_c *ck = make_string(k);
+    for ( uint64_t q = 0; q < p->asset_count; q++ )
+    {
+        _match = 1;
+        for ( uint64_t r = 0; r < len; r++ )
+        {
+            if ( p->assets[q]->key[r] != ck[r] )
+            {
+                _match = 0;
+                break;
+            }
+        }
+        if ( _match )
+            break;
     }
-    return 0;
+    free(ck);
+    return _match;
 }
 
 uint64_t npackage_header_size(npackage *p)
@@ -76,37 +90,15 @@ npackage * npackage_open(const wchar_t *fp)
         fclose(fh);
         return NULL;
     }
-    if ( arrcmp(sig, fsig, 7) != 0 ) {
+    if ( arrcmp8(sig, fsig, 7) != 0 ) {
         fclose(fh);
         return NULL;
     }
-
-    /*
-    size of current wide
-    */
-    uint8_t _szcw = sizeof(wchar_t);
-
-    /*
-    copy of size of wide during _export_
-    */
-    uint8_t _szwc;
 
     /*
     encoded in big endian flag
     */
     uint8_t t10 = fread(&_eibe, sizeof(uint8_t), 1, fh) == 1;
-
-    /*
-    extract the size of the wide char on the export system
-    if the current wide char size is less than, terminate
-    */
-    uint8_t t11 = fread(&_szwc, sizeof(uint8_t), 1, fh) == 1;
-    if ( _szcw < _szwc )
-    {
-        fclose(fh);
-        return NULL;
-    }
-
     uint8_t t2 = fread(&p->make_time, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t3 = fread(&p->mod_time, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t4 = fread(&p->mod_count, sizeof(uint64_t), 1, fh) == 1;
@@ -140,8 +132,8 @@ npackage * npackage_open(const wchar_t *fp)
         t7 += fread(&a->data_len, sizeof(uint64_t), 1, fh);
         t7 += fread(&a->key_len, sizeof(uint64_t), 1, fh);
 
-        a->key = (wchar_t*)malloc(sizeof(wchar_t) * a->key_len);
-        t7 += fread(a->key, sizeof(wchar_t), a->key_len, fh);
+        a->key = (nwide_c*)malloc(sizeof(nwide_c) * a->key_len);
+        t7 += fread(a->key, sizeof(nwide_c), a->key_len, fh);
         a->data = (unsigned char*)malloc(sizeof(char) * a->data_len);
         t7 += fread(a->data, sizeof(char), a->data_len, fh);
 
@@ -171,12 +163,7 @@ npackage * npackage_open(const wchar_t *fp)
             a->key_len = u64swap_endian(a->key_len);
             p->sizes[k] = u64swap_endian(p->sizes[k]);
             for ( uint64_t j = 0; j < a->key_len; j++ )
-            {
-                if ( _szcw == 2 )
-                    a->key[j] = (a->key[j] << 8) | (a->key[j] >> 8);
-                else if ( _szcw == 4 )
-                    a->key[j] = (a->key[j] << 16) | (a->key[j] >> 16);
-            }
+                a->key[j] = i32swap_endian(a->key[j]);
         }
 
         /*
@@ -191,7 +178,7 @@ npackage * npackage_open(const wchar_t *fp)
     /*
     ... package
     */
-    if ( t1 && t2 && t3 && t4 && t5 && t6 && t7 && t8 && t9 && t10 && t11 )
+    if ( t1 && t2 && t3 && t4 && t5 && t6 && t7 && t8 && t9 && t10 )
         return p;
 
     /*
@@ -219,14 +206,8 @@ uint8_t npackage_save(const wchar_t *fp, npackage *p)
     uint8_t sig[7] = {110, 108, 97, 98, 115, 110, 112};
     uint8_t _be = is_be();
 
-    /*
-    ... either 2 or 4 bytes
-    */
-    uint8_t _szws = sizeof(wchar_t);
-
     uint8_t t1 = fwrite(sig, sizeof(uint8_t), 7, fh) == 7;
     uint8_t t10 = fwrite(&_be, sizeof(uint8_t), 1, fh) == 1;
-    uint8_t t11 = fwrite(&_szws, sizeof(uint8_t), 1, fh) == 1;
     uint8_t t2 = fwrite(&p->make_time, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t3 = fwrite(&p->mod_time, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t4 = fwrite(&p->mod_count, sizeof(uint64_t), 1, fh) == 1;
@@ -243,14 +224,14 @@ uint8_t npackage_save(const wchar_t *fp, npackage *p)
         t7 += fwrite(&p->assets[k]->mod_count, sizeof(uint64_t), 1, fh);
         t7 += fwrite(&p->assets[k]->data_len, sizeof(uint64_t), 1, fh);
         t7 += fwrite(&p->assets[k]->key_len, sizeof(uint64_t), 1, fh);
-        t7 += fwrite(p->assets[k]->key, sizeof(wchar_t), p->assets[k]->key_len, fh);
+        t7 += fwrite(p->assets[k]->key, sizeof(nwide_c), p->assets[k]->key_len, fh);
         t7 += fwrite(p->assets[k]->data, sizeof(char), p->assets[k]->data_len, fh);
         t7 = t7 == (5 + p->assets[k]->key_len + p->assets[k]->data_len);
         if ( t7 != 1 )
             break;
     }
     fclose(fh);
-    if ( t1 && t2 && t3 && t4 && t5 && t6 && t7 && t8 && t9 && t10 && t11 )
+    if ( t1 && t2 && t3 && t4 && t5 && t6 && t7 && t8 && t9 && t10 )
         return 1;
     return 0;
 }
@@ -317,10 +298,23 @@ int8_t nasset_cmp(nasset *p, nasset *q)
         return t4;
     if ( t5 != 0 )
         return t5;
-    t1 = arrcmp((uint8_t*)p->key, (uint8_t*)q->key, p->key_len);
+    t1 = 0;
+    for ( uint64_t k = 0; k < p->key_len; k++ )
+    {
+        if ( p->key[k] > q->key[k] )
+        {
+            t1 = 1;
+            break;
+        }
+        else if ( p->key[k] < q->key[k] )
+        {
+            t1 = -1;
+            break;
+        }
+    }
     if ( t1 != 0 )
         return t1;
-    t1 = arrcmp((uint8_t*)p->data, (uint8_t*)q->data, p->data_len);
+    t1 = arrcmp8((uint8_t*)p->data, (uint8_t*)q->data, p->data_len);
     return t1;
 }
 
@@ -355,17 +349,23 @@ nasset * nasset_from_local(const wchar_t *k, const wchar_t *fp)
     }
     fclose(fh);
     a->data_len = len;
-    a->key_len = sizeof(wchar_t) * wcslen(k);
-    a->key = k;
+    a->key_len = sizeof(nwide_c) * wcslen(k);
+    a->key = make_string(k);
     return a;
 }
 
 nasset *nasset_get(npackage *p, const wchar_t *k)
 {
-    for ( uint64_t q = 0; q < p->asset_count; q++ ) {
-        if ( wcscmp(p->assets[q]->key, k) == 0 )
+    nwide_c* ck = make_string(k);
+    for ( uint64_t q = 0; q < p->asset_count; q++ )
+    {
+        if ( arrcmp32(p->assets[q]->key, ck, wcslen(k)) == 0 )
+        {
+            free(ck);
             return p->assets[q];
+        }
     }
+    free(ck);
     return NULL;
 }
 
@@ -406,8 +406,8 @@ uint8_t nasset_set_key(nasset *a, const wchar_t *k)
             p->mod_count++;
         }
     }
-    a->key_len = sizeof(wchar_t) * wcslen(k);
-    a->key = k;
+    a->key_len = wcslen(k);
+    a->key = make_string(k);
     return 1;
 }
 
@@ -453,7 +453,7 @@ uint64_t nasset_size(nasset *a)
     s += sizeof(uint64_t);
     /* + key size */
     if ( a->key != NULL )
-        s += a->key_len;
+        s += a->key_len * sizeof(nwide_c);
     /* + data size */
     s += sizeof(char) * a->data_len;
     return s;
@@ -499,9 +499,10 @@ uint8_t nasset_insert(npackage *p, nasset *a)
 
 nasset* nasset_unset(npackage *p, const wchar_t *k)
 {
+    nwide_c *ck = make_string(k);
     for ( uint64_t q = 0; q < p->asset_count; q++ )
     {
-        if ( wcscmp(p->assets[q]->key, k) == 0 )
+        if ( arrcmp32(p->assets[q]->key, ck, wcslen(k)) == 0 )
         {
             nasset *a = p->assets[q];
             uint64_t ac = p->asset_count;
@@ -532,8 +533,10 @@ nasset* nasset_unset(npackage *p, const wchar_t *k)
             free(p->assets);
             p->sizes = sz;
             p->assets = pa;
+            free(ck);
             return a;
     }}
+    free(ck);
     return NULL;
 }
 

@@ -26,6 +26,11 @@
 #include "utils.h"
 
 /*
+replacement for wchar_t (2 bytes on win)
+*/
+typedef int32_t nwide_c;
+
+/*
 nasset's are nested inside npackages
 */
 typedef struct
@@ -63,7 +68,7 @@ typedef struct
     /*
     key ident
     */
-    wchar_t *key;
+    nwide_c *key;
 
     /*
     raw data
