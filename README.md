@@ -37,6 +37,8 @@ int main(void)
   nasset_set_value(a, d, data_len);
   nasset_insert(p, a);
   npackage_save(fp, p);
+  npackage_close(p);
+  free(k);
   return 0;
 }
 ```
