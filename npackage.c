@@ -349,7 +349,7 @@ nasset * nasset_from_local(const wchar_t *k, const wchar_t *fp)
     }
     fclose(fh);
     a->data_len = len;
-    a->key_len = sizeof(nwide_c) * wcslen(k);
+    a->key_len = wcslen(k);
     a->key = make_string(k);
     return a;
 }
