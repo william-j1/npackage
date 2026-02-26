@@ -362,3 +362,88 @@ void iut8(void)
 	printf("swap 4: %lld\n", __builtin_bswap64(5984735));
 	assert(5984735 == u64swap_endian(u64swap_endian(5984735)));
 }
+
+void iut9(void)
+{
+	npackage *p = new_npackage();
+	wchar_t *k1 = (wchar_t *)malloc(5 * sizeof(wchar_t));
+	wchar_t *fp1 = (wchar_t *)malloc(16 * sizeof(wchar_t));
+	wchar_t *k2 = (wchar_t *)malloc(5 * sizeof(wchar_t));
+	wchar_t *fp2 = (wchar_t *)malloc(16 * sizeof(wchar_t));
+	wchar_t *k3 = (wchar_t *)malloc(5 * sizeof(wchar_t));
+	wchar_t *fp3 = (wchar_t *)malloc(16 * sizeof(wchar_t));
+	wchar_t *k4 = (wchar_t *)malloc(5 * sizeof(wchar_t));
+	wchar_t *fp4 = (wchar_t *)malloc(17 * sizeof(wchar_t));
+	wchar_t *output_fp = (wchar_t *)malloc(18 * sizeof(wchar_t));
+
+	wcsncpy(k1, L"key1", 4);
+	wcsncpy(fp1, L"tests\\text1.txt", 15);
+	wcsncpy(k2, L"key2", 4);
+	wcsncpy(fp2, L"tests\\text2.txt", 15);
+	wcsncpy(k3, L"key3", 4);
+	wcsncpy(fp3, L"tests\\text3.txt", 15);
+	wcsncpy(k4, L"key4", 4);
+	wcsncpy(fp4, L"tests\\bitmap.png", 16);
+	wcsncpy(output_fp, L"tests\\output.test", 17);
+	
+	k1[4] = L'\0';
+    fp1[15] = L'\0';
+	k2[4] = L'\0';
+    fp2[15] = L'\0';
+	k3[4] = L'\0';
+    fp3[15] = L'\0';
+	k4[4] = L'\0';
+    fp4[16] = L'\0';
+	output_fp[17] = L'\0';
+
+	nasset *a1 = nasset_from_local(k1, fp1);
+	nasset *a2 = nasset_from_local(k2, fp2);
+	nasset *a3 = nasset_from_local(k3, fp3);
+	nasset *a4 = nasset_from_local(k4, fp4);
+	nasset_insert(p, a1);
+	nasset_insert(p, a2);
+	nasset_insert(p, a3);
+	nasset_insert(p, a4);
+	printf("%d\n", npackage_save(output_fp, p));
+	npackage_close(p);
+	free(k1);
+	free(fp1);
+	free(k2);
+	free(fp2);
+	free(k3);
+	free(fp3);
+	free(k4);
+	free(fp4);
+	free(output_fp);
+}
+
+void iut10(void)
+{
+	wchar_t *recovery_fp = (wchar_t *)malloc(18 * sizeof(wchar_t));
+	wcsncpy(recovery_fp, L"tests\\output.test", 17);
+	recovery_fp[17] = L'\0';
+	npackage *p = npackage_open(recovery_fp);
+	assert(p != NULL);
+	printf("%d", p->asset_count);
+	npackage_close(p);
+}
+
+void iut11(void)
+{
+	wchar_t *fp1 = (wchar_t *)malloc(17 * sizeof(wchar_t));
+	wcsncpy(fp1, L"tests\\bitma_.png", 16);
+	fp1[16] = L'\0';
+	wchar_t *key = (wchar_t *)malloc(5 * sizeof(wchar_t));
+	wcsncpy(key, L"key4", 4);
+	key[4] = L'\0';
+	wchar_t *recovery_fp = (wchar_t *)malloc(18 * sizeof(wchar_t));
+	wcsncpy(recovery_fp, L"tests\\output.test", 17);
+	recovery_fp[17] = L'\0';
+	npackage *p = npackage_open(recovery_fp);
+	assert(p != NULL);
+	printf("%d\n", nasset_to_local(p, key, fp1));
+	npackage_close(p);
+	free(fp1);
+	free(key);
+	free(recovery_fp);
+}

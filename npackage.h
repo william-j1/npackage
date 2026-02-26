@@ -135,6 +135,11 @@ nasset comparison
 int8_t nasset_cmp(nasset *p, nasset *q);
 
 /*
+close nasset
+*/
+uint8_t nasset_close(nasset *a);
+
+/*
 delete the asset from the package
 */
 uint8_t nasset_delete(npackage *p, const wchar_t *k);
@@ -165,9 +170,9 @@ size of all assets
 uint64_t nassets_size(npackage *p);
 
 /*
-close nasset
+extract nasset to local storage
 */
-uint8_t nasset_close(nasset *a);
+uint8_t nasset_to_local(npackage *p, const wchar_t *k, const wchar_t *fp);
 
 /*
 unset the asset from the package

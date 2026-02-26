@@ -14,5 +14,8 @@ int main(void)
 	iut6();
 	iut7();
 	iut8();
+	iut9();
+	iut10();
+	iut11();
 	return 0;
 }

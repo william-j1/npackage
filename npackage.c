@@ -126,7 +126,7 @@ npackage * npackage_open(const wchar_t *fp)
     for ( k = 0; k < p->asset_count; k++ )
     {
         nasset *a = new_nasset();
-        t7 += fread(&a->make_time, sizeof(uint64_t), 1, fh);
+        t7 = fread(&a->make_time, sizeof(uint64_t), 1, fh);
         t7 += fread(&a->mod_time, sizeof(uint64_t), 1, fh);
         t7 += fread(&a->mod_count, sizeof(uint64_t), 1, fh);
         t7 += fread(&a->data_len, sizeof(uint64_t), 1, fh);
@@ -205,7 +205,6 @@ uint8_t npackage_save(const wchar_t *fp, npackage *p)
         return 0;
     uint8_t sig[7] = {110, 108, 97, 98, 115, 110, 112};
     uint8_t _be = is_be();
-
     uint8_t t1 = fwrite(sig, sizeof(uint8_t), 7, fh) == 7;
     uint8_t t10 = fwrite(&_be, sizeof(uint8_t), 1, fh) == 1;
     uint8_t t2 = fwrite(&p->make_time, sizeof(uint64_t), 1, fh) == 1;
@@ -219,7 +218,7 @@ uint8_t npackage_save(const wchar_t *fp, npackage *p)
     nasset *a;
     for ( uint64_t k = 0; k < p->asset_count; k++ ) {
         a = p->assets[k];
-        t7 += fwrite(&p->assets[k]->make_time, sizeof(uint64_t), 1, fh);
+        t7 = fwrite(&p->assets[k]->make_time, sizeof(uint64_t), 1, fh);
         t7 += fwrite(&p->assets[k]->mod_time, sizeof(uint64_t), 1, fh);
         t7 += fwrite(&p->assets[k]->mod_count, sizeof(uint64_t), 1, fh);
         t7 += fwrite(&p->assets[k]->data_len, sizeof(uint64_t), 1, fh);
@@ -465,6 +464,36 @@ uint64_t nassets_size(npackage *p)
     for ( uint64_t k = 0; k < p->asset_count; k++ )
         s += nasset_size(p->assets[k]);
     return s;
+}
+
+uint8_t nasset_to_local(npackage *p, const wchar_t *k, const wchar_t *fp)
+{
+    nwide_c *ck = make_string(k);
+    uint64_t len = wcslen(k);
+    uint8_t _match;
+
+    for ( uint64_t q = 0; q < p->asset_count; q++ )
+    {
+        _match = 1;
+        for ( uint64_t r = 0; r < len; r++ )
+        {
+            if ( p->assets[q]->key[r] != ck[r] )
+            {
+                _match = 0;
+                break;
+            }
+        }
+        if ( _match )
+        {
+            FILE *fh = _wfopen(fp, L"wb");
+            if ( fh == NULL )
+                return 0;
+            uint64_t n = fwrite(p->assets[q]->data, sizeof(unsigned char), p->assets[q]->data_len, fh);
+            fclose(fh);
+            return n == p->assets[q]->data_len;
+        }
+    }
+    return 0;
 }
 
 uint8_t nasset_insert(npackage *p, nasset *a)
