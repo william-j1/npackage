@@ -28,7 +28,7 @@
 /*
 replacement for wchar_t (2 bytes on win)
 */
-typedef int32_t nwide_c;
+typedef uint32_t nwide_c;
 
 /*
 nasset's are nested inside npackages
