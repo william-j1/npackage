@@ -26,7 +26,7 @@
 #include "utils.h"
 
 /*
-replacement for wchar_t (2 bytes on win)
+replacement for wchar_t
 */
 typedef uint32_t nwide_c;
 
