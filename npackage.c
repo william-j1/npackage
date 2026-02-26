@@ -512,6 +512,7 @@ uint8_t nasset_to_local(npackage *p, const wchar_t *k, const wchar_t *fp)
         }
         if ( _match )
         {
+            free(ck);
             FILE *fh = _wfopen(fp, L"wb");
             if ( fh == NULL )
                 return 0;
