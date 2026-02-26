@@ -424,7 +424,7 @@ void iut10(void)
 	recovery_fp[17] = L'\0';
 	npackage *p = npackage_open(recovery_fp);
 	assert(p != NULL);
-	printf("%d", p->asset_count);
+	printf("%d\n", p->asset_count);
 	npackage_close(p);
 }
 

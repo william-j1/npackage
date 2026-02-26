@@ -54,6 +54,11 @@ int32_t i32swap_endian(int32_t v)
     return ((v>>24)&0xff) | ((v<<8)&0xff0000) | ((v>>8)&0xff00) | ((v<<24)&0xff000000);
 }
 
+uint32_t u32swap_endian(uint32_t v)
+{
+    return ((v>>24)&0xff) | ((v<<8)&0xff0000) | ((v>>8)&0xff00) | ((v<<24)&0xff000000);
+}
+
 uint64_t u64swap_endian(uint64_t v)
 {
 #ifdef __GNUC__

@@ -132,6 +132,7 @@ npackage * npackage_open(const wchar_t *fp)
     */
     if ( _be != _eibe )
     {
+        _crc32 = u32swap_endian(_crc32);
         p->make_time = u64swap_endian(p->make_time);
         p->mod_time = u64swap_endian(p->mod_time);
         p->mod_count = u64swap_endian(p->mod_count);
