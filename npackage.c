@@ -18,6 +18,17 @@
 ********************************************************************/
 #include "npackage.h"
 
+uint32_t _np_calc_crc32(npackage *p)
+{
+    uint32_t c = UINT32_MAX;
+    for (uint64_t k = 0, j; k < p->asset_count; k++)
+    {
+        for (j = 0; j < p->assets[k]->data_len; j++)
+            c = (c >> 8) ^ _np_lookup_crc32[(c ^ p->assets[k]->data[j]) & 0xFF];
+    }
+    return ~c;
+}
+
 npackage *new_npackage(void)
 {
     npackage *p = (npackage*)malloc(sizeof(npackage));
@@ -78,6 +89,11 @@ npackage * npackage_open(const wchar_t *fp)
     */
     uint8_t _be = is_be(), _eibe;
 
+    /*
+    checksum
+    */
+    uint32_t _crc32;
+
 	fh = _wfopen(fp, L"rb");
     if ( fh == NULL )
         return NULL;
@@ -99,6 +115,11 @@ npackage * npackage_open(const wchar_t *fp)
     encoded in big endian flag
     */
     uint8_t t10 = fread(&_eibe, sizeof(uint8_t), 1, fh) == 1;
+
+    /*
+    checksum during export
+    */
+    uint8_t t11 = fread(&_crc32, sizeof(uint32_t), 1, fh) == 1;
     uint8_t t2 = fread(&p->make_time, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t3 = fread(&p->mod_time, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t4 = fread(&p->mod_count, sizeof(uint64_t), 1, fh) == 1;
@@ -178,8 +199,11 @@ npackage * npackage_open(const wchar_t *fp)
     /*
     ... package
     */
-    if ( t1 && t2 && t3 && t4 && t5 && t6 && t7 && t8 && t9 && t10 )
-        return p;
+    if ( t1 && t2 && t3 && t4 && t5 && t6 && t7 && t8 && t9 && t10 && t11 )
+    {
+        if ( _crc32 == _np_calc_crc32(p) )
+            return p;
+    }
 
     /*
     ... integrity fail, cleanse structs
@@ -205,8 +229,10 @@ uint8_t npackage_save(const wchar_t *fp, npackage *p)
         return 0;
     uint8_t sig[7] = {110, 108, 97, 98, 115, 110, 112};
     uint8_t _be = is_be();
+    uint32_t _crc32 = _np_calc_crc32(p);
     uint8_t t1 = fwrite(sig, sizeof(uint8_t), 7, fh) == 7;
     uint8_t t10 = fwrite(&_be, sizeof(uint8_t), 1, fh) == 1;
+    uint8_t t11 = fwrite(&_crc32, sizeof(uint32_t), 1, fh) == 1;
     uint8_t t2 = fwrite(&p->make_time, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t3 = fwrite(&p->mod_time, sizeof(uint64_t), 1, fh) == 1;
     uint8_t t4 = fwrite(&p->mod_count, sizeof(uint64_t), 1, fh) == 1;
@@ -230,7 +256,7 @@ uint8_t npackage_save(const wchar_t *fp, npackage *p)
             break;
     }
     fclose(fh);
-    if ( t1 && t2 && t3 && t4 && t5 && t6 && t7 && t8 && t9 && t10 )
+    if ( t1 && t2 && t3 && t4 && t5 && t6 && t7 && t8 && t9 && t10 && t11 )
         return 1;
     return 0;
 }
